@@ -1,30 +1,32 @@
-<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ESPARTA V5 SUPERPSX</title>
-<style>body{background:#070f1e;color:white;font-family:Arial;padding:12px}textarea{width:100%;height:150px;border-radius:10px;padding:10px}button{width:100%;background:#00ff88;color:black;padding:14px;border:none;border-radius:10px;font-weight:bold;margin-top:10px;font-size:16px} #out{background:#12233f;padding:10px;margin-top:15px;border-radius:10px;white-space:pre-wrap;word-break:break-all}</style>
-</head><body>
-<h2>ESPARTA V5 - COPIA SUPERPSX SIN BLOQUEO</h2>
-<p>1. Abre superpsx.com/category/ps4 en otra pestaña<br>2. Mantén pulsado > Ver código fuente > Copiar todo<br>3. Pega abajo y dale a EXTRAER</p>
-<textarea id="html" placeholder="Pega aquí el código fuente de superpsx.com"></textarea>
-<button onclick="extraer()">EXTRAER JUEGOS</button>
-<div id="out">Esperando código...</div>
+<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ESPARTA V6</title></head><body style="background:#0d1117;color:white;font-family:Arial;padding:12px">
+<h2>ESPARTA V6 - FIJO</h2>
+<textarea id="c" placeholder="Pega aqui el codigo fuente que copiaste" style="width:100%;height:180px;background:#161b22;color:#0f0;border:1px solid #333"></textarea><br>
+<button onclick="go()" style="width:100%;padding:15px;background:#00ff88;color:black;font-weight:bold;border:none;border-radius:12px;font-size:18px;margin-top:10px">EXTRAER JUEGOS</button>
+<div id="r" style="margin-top:15px"></div>
 <script>
-function extraer(){
-let html=document.getElementById('html').value;
-let out=document.getElementById('out');
-if(html.length<100){out.innerText='Pega más texto, casi vacío';return;}
-let doc=new DOMParser().parseFromString(html,'text/html');
-let juegos=[];
-doc.querySelectorAll('img').forEach(img=>{
-let src=img.src||img.getAttribute('data-src')||'';
-let alt=img.alt||'';
-let parent=img.closest('a');
-let link=parent?parent.href:'';
-if(src.includes('superpsx') && src.includes('uploads') && alt.length>2){
-juegos.push(`<div class="card">\n  <img src="${src}">\n  <h3>${alt}</h3>\n  <a href="${link}">Descargar</a>\n</div>`);
+function go(){
+let code=document.getElementById('c').value;
+let juegos=[]; let visto=new Set();
+let re=/<a[^>]+href="(https:\/\/superpsx\.com\/[^"]+)"[^>]*>[\s\S]*?<img[^>]+src="(https:\/\/superpsx\.com\/wp-content\/uploads[^"]+)"[^>]*>/gi;
+let m;
+while((m=re.exec(code))!==null){
+ let link=m[1]; let img=m[2];
+ if(img.includes('Logo')||img.includes('logo')||img.toLowerCase().includes('superpsx-logo')) continue;
+ if(link.includes('/category/')||link.endsWith('.com/')) continue;
+ if(visto.has(link)) continue;
+ visto.add(link);
+ let titulo=link.split('/').filter(Boolean).pop().replace(/-/g,' ').replace(/ps4|pkg|duper/gi,'').trim();
+ if(titulo.length<3) titulo='Juego PS4';
+ juegos.push({t:titulo.charAt(0).toUpperCase()+titulo.slice(1), i:img, l:link});
 }
-});
-let unicos=[...new Set(juegos)];
-out.innerText=unicos.slice(0,60).join('\n\n') || 'No encontré juegos, ¿pegaste el código fuente completo? Asegúrate que copiaste TODO el código fuente.';
+if(juegos.length==0){
+ document.getElementById('r').innerHTML='<p style=color:red>No encontre juegos. Asegurate que copiaste TODO el codigo fuente, desde arriba hasta abajo</p>'; return;
+}
+document.getElementById('r').innerHTML=`<p style=color:#00ff88>Encontrados: ${juegos.length} juegos</p><textarea id="json" style="width:100%;height:120px">${JSON.stringify(juegos,null,2)}</textarea><br><button onclick="gen()" style="width:100%;padding:15px;background:#ff0000;color:white;border:none;border-radius:12px;margin-top:10px;font-size:18px">GENERAR MI INDEX.HTML FINAL</button><div id="final" style="margin-top:15px"></div>`;
+window.lista=juegos;
+}
+function gen(){
+let html=`<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ESPARTA STORE</title><style>body{background:#0d1117;color:#fff;font-family:Arial;margin:0;padding:10px}h1{text-align:center;color:#ff0000}#grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.card{background:#161b22;border-radius:12px;overflow:hidden;text-align:center;padding-bottom:8px}.card img{width:100%;height:185px;object-fit:cover}.card h3{font-size:11px;margin:5px;height:28px;overflow:hidden;text-transform:capitalize}.btn{background:#ff0000;color:#fff;padding:5px 10px;border-radius:6px;text-decoration:none;display:inline-block;font-size:12px}#busc{width:100%;padding:12px;border-radius:10px;border:none;margin:10px 0;background:#161b22;color:white}</style></head><body><h1>ESPARTA STORE PS4</h1><input id="busc" placeholder="Buscar juego..." onkeyup="b()"><div id="grid"></div><script>let juegos=${JSON.stringify(window.lista)};let grid=document.getElementById('grid');function pintar(l){grid.innerHTML='';l.forEach(j=>{grid.innerHTML+=\`<div class="card"><img src="\${j.i}"><h3>\${j.t}</h3><a class="btn" href="\${j.l}" target="_blank">Ver</a></div>\`;});}function b(){let q=document.getElementById('busc').value.toLowerCase();pintar(juegos.filter(j=>j.t.toLowerCase().includes(q)));}pintar(juegos);<\/script></body></html>`;
+document.getElementById('final').innerHTML=`<p>Copia esto y pegalo en tu index.html:</p><textarea style="width:100%;height:250px">${html.replace(/</g,'&lt;')}</textarea><br><br><textarea id="copy2" style="position:absolute;left:-9999px">${html}</textarea>`;
 }
 </script></body></html>
