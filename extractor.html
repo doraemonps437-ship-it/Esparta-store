@@ -1,1 +1,33 @@
-<!DOCTYPE html><html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width"><title>ESPARTA COPIADOR</title><style>body{background:#070f1e;color:#fff;font-family:Arial;padding:12px}textarea{width:100%;height:130px;border-radius:8px;padding:8px}button{background:#00a8ff;color:#fff;border:none;padding:13px;width:100%;border-radius:8px;font-weight:bold}pre{background:#12233f;padding:10px;border-radius:8px;font-size:11px;white-space:pre-wrap;word-break:break-all;margin-top:10px}</style></head><body><h2>ESPARTA COPIADOR</h2><textarea id="a" placeholder="Pega aqui el codigo fuente de otra tienda..."></textarea><button onclick="c()">COPIAR JUEGOS</button><pre id="b"></pre><script>function c(){let h=document.getElementById('a').value,o="",r=/href=["']([^"']+\.pkg)["'][^>]*>([^<]+)?/gi,m;while(m=r.exec(h)){let l=m[1],n=(m[2]||l.split('/').pop()).trim();o+=`<div class="card">\n<img src="https://dummyimage.com/300x400/12233f/00a8ff&text=${encodeURIComponent(n.slice(0,12))}">\n<h3>${n}</h3>\n<a class="btn" href="${l}">Descargar</a>\n</div>\n\n`;}if(!o)o="No encontre .pkg";document.getElementById('b').textContent=o;}</script></body></html>
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ESPARTA V2</title>
+<style>body{background:#070f1e;color:white;font-family:Arial;padding:10px}textarea{width:100%;height:200px;border-radius:10px;padding:10px}button{width:100%;background:#00a8ff;color:white;padding:15px;border:none;border-radius:10px;font-weight:bold;margin-top:10px;font-size:16px}#out{background:#12233f;padding:10px;margin-top:15px;border-radius:10px;white-space:pre-wrap;word-break:break-all}</style>
+</head>
+<body>
+<h2>ESPARTA COPIADOR V2</h2>
+<textarea id="code" placeholder="Pega AQUI el codigo fuente FEO (no el link)"></textarea>
+<button onclick="copiar()">COPIAR JUEGOS</button>
+<div id="out">Esperando código...</div>
+<script>
+function copiar(){
+let html=document.getElementById('code').value;
+let out=document.getElementById('out');
+if(html.includes('view-source:')){out.innerText='ERROR: Pegaste el link. Tienes que abrir ese link y copiar el CODIGO que sale dentro, no el link.';return;}
+let doc=new DOMParser().parseFromString(html,'text/html');
+let juegos=[...doc.querySelectorAll('article, .post, .pbox, .game, a')];
+let lista=[];
+doc.querySelectorAll('img').forEach(img=>{
+let title=img.alt||img.getAttribute('title')||'Juego PS4';
+let src=img.src||img.getAttribute('data-src');
+let link=img.closest('a')?.href||'#';
+if(src && src.length>10 && !src.includes('logo') && !src.includes('icon')){
+lista.push(`<div class="card">\n<img src="${src}">\n<h3>${title}</h3>\n<a class="btn" href="${link}">Ver Juego</a>\n</div>`);
+}
+});
+if(lista.length==0){out.innerText='No encontré imágenes. ¿Seguro copiaste TODO el código fuente? Copia desde arriba hasta abajo.';return;}
+out.innerText=lista.slice(0,30).join('\n\n');
+}
+</script>
+</body>
+</html>
