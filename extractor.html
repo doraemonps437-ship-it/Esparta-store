@@ -1,32 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>ESPARTA V2</title>
-<style>body{background:#070f1e;color:white;font-family:Arial;padding:10px}textarea{width:100%;height:200px;border-radius:10px;padding:10px}button{width:100%;background:#00a8ff;color:white;padding:15px;border:none;border-radius:10px;font-weight:bold;margin-top:10px;font-size:16px}#out{background:#12233f;padding:10px;margin-top:15px;border-radius:10px;white-space:pre-wrap;word-break:break-all}</style>
+<title>ESPARTA V3</title>
+<style>body{background:#070f1e;color:white;font-family:Arial;padding:12px}input{width:100%;padding:12px;border-radius:10px;border:none}button{width:100%;background:#00a8ff;color:white;padding:14px;border:none;border-radius:10px;font-weight:bold;margin-top:10px;font-size:16px}#out{background:#12233f;padding:10px;margin-top:15px;border-radius:10px;word-break:break-all;white-space:pre-wrap}</style>
 </head>
 <body>
-<h2>ESPARTA COPIADOR V2</h2>
-<textarea id="code" placeholder="Pega AQUI el codigo fuente FEO (no el link)"></textarea>
-<button onclick="copiar()">COPIAR JUEGOS</button>
-<div id="out">Esperando código...</div>
+<h2>ESPARTA V3 - PEGAR LINK</h2>
+<input id="url" placeholder="Pega el link, ej: https://dlpsgame.com/category/ps4/">
+<button onclick="buscar()">BUSCAR JUEGOS</button>
+<div id="out">Pega el link arriba y dale a BUSCAR...</div>
 <script>
-function copiar(){
-let html=document.getElementById('code').value;
+async function buscar(){
+let url=document.getElementById('url').value.trim();
 let out=document.getElementById('out');
-if(html.includes('view-source:')){out.innerText='ERROR: Pegaste el link. Tienes que abrir ese link y copiar el CODIGO que sale dentro, no el link.';return;}
+if(!url){out.innerText='Pega un link';return;}
+out.innerText='Buscando... espera 10 seg...';
+try{
+let proxy='https://api.allorigins.win/raw?url='+encodeURIComponent(url);
+let res=await fetch(proxy);
+let html=await res.text();
 let doc=new DOMParser().parseFromString(html,'text/html');
-let juegos=[...doc.querySelectorAll('article, .post, .pbox, .game, a')];
 let lista=[];
 doc.querySelectorAll('img').forEach(img=>{
-let title=img.alt||img.getAttribute('title')||'Juego PS4';
-let src=img.src||img.getAttribute('data-src');
-let link=img.closest('a')?.href||'#';
-if(src && src.length>10 && !src.includes('logo') && !src.includes('icon')){
-lista.push(`<div class="card">\n<img src="${src}">\n<h3>${title}</h3>\n<a class="btn" href="${link}">Ver Juego</a>\n</div>`);
+let src=img.src||img.getAttribute('data-src')||'';
+let title=(img.alt||'Juego PS4').replace(/"/g,'');
+if(src.includes('dlpsgame') && src.length>20){
+lista.push(`<div class="card">\n<img src="${src}">\n<h3>${title}</h3>\n<a class="btn" href="#">Descargar</a>\n</div>`);
 }
 });
-if(lista.length==0){out.innerText='No encontré imágenes. ¿Seguro copiaste TODO el código fuente? Copia desde arriba hasta abajo.';return;}
-out.innerText=lista.slice(0,30).join('\n\n');
+if(lista.length==0){out.innerText='No encontre, prueba con otra pagina. Codigo html: '+html.substring(0,500);return;}
+out.innerText=lista.slice(0,40).join('\n\n');
+}catch(e){out.innerText='Error: '+e+'\nPrueba con otra tienda que no sea dlpsgame, esa tiene bloqueo fuerte.'}
 }
 </script>
 </body>
