@@ -1,40 +1,34 @@
 <!DOCTYPE html>
-<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>ESPARTA V4 FINAL</title>
-<style>body{background:#070f1e;color:white;font-family:Arial;padding:12px}input{width:100%;padding:12px;border-radius:10px;border:none}button{width:100%;background:#00a8ff;color:white;padding:14px;border:none;border-radius:10px;font-weight:bold;margin-top:10px} #out{background:#12233f;padding:10px;margin-top:15px;border-radius:10px;white-space:pre-wrap;word-break:break-all}</style>
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ESPARTA SUPERPSX EXTRACTOR</title>
+<style>body{background:#070f1e;color:white;font-family:Arial;padding:12px}input{width:100%;padding:12px;border-radius:10px;border:none}button{width:100%;background:#ff0000;color:white;padding:14px;border:none;border-radius:10px;font-weight:bold;margin-top:10px;font-size:16px} #out{background:#12233f;padding:10px;margin-top:15px;border-radius:10px;white-space:pre-wrap;word-break:break-all;max-height:600px;overflow:auto}</style>
 </head><body>
-<h2>ESPARTA V4 - PRUEBA CON OTRA TIENDA</h2>
-<input id="url" value="https://ps4pkg.link/" placeholder="Pega link de otra tienda">
-<button onclick="buscar()">BUSCAR JUEGOS</button>
-<div id="out">Consejo: dlpsgame está bloqueada. Prueba con: ps4pkg.link / superps4.com / psgamer.fun</div>
+<h2>ESPARTA - COPIADOR SUPERPSX</h2>
+<input id="url" value="https://superpsx.com/category/ps4" >
+<button onclick="copiar()">COPIAR JUEGOS DE ESTA PAGINA</button>
+<div id="out">Dale al botón rojo...</div>
 <script>
-async function buscar(){
-let url=document.getElementById('url').value.trim();
+async function copiar(){
+let url=document.getElementById('url').value;
 let out=document.getElementById('out');
-out.innerText='Probando 3 formas de entrar... espera 15 seg...';
-let proxies=[
-'https://corsproxy.io/?'+encodeURIComponent(url),
-'https://api.allorigins.win/raw?url='+encodeURIComponent(url),
-'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(url)
-];
-for(let p of proxies){
+out.innerText='Copiando Far Cry, Bravo Team, etc... espera 10 seg...';
 try{
-let r=await fetch(p);
+let proxy='https://corsproxy.io/?'+encodeURIComponent(url);
+let r=await fetch(proxy);
 let html=await r.text();
-if(html.length>1000){
 let doc=new DOMParser().parseFromString(html,'text/html');
-let lista=[];
-doc.querySelectorAll('img').forEach(img=>{
-let src=img.src||img.dataset.src||'';
-if(src.length>20 && !src.includes('logo')){
-let title=(img.alt||'Juego PS4').substring(0,40);
-lista.push(`IMG: ${src}\nTITLE: ${title}\n---`);
+let juegos=[];
+doc.querySelectorAll('a').forEach(a=>{
+let img=a.querySelector('img');
+if(img && img.src && a.textContent.trim().length>3 && a.textContent.trim().length<50){
+if(img.src.includes('superpsx') || img.src.includes('wp-content')){
+juegos.push(`<div class="card">\n  <img src="${img.src}">\n  <h3>${a.textContent.trim()}</h3>\n  <a class="btn" href="${a.href}">Descargar</a>\n</div>`);
+}
 }
 });
-if(lista.length>0){out.innerText='¡SI ENTRO! Copiado con: '+p+'\n\n'+lista.slice(0,20).join('\n'); return;}
-}
-}catch(e){}
-}
-out.innerText='Esa tienda también bloquea. Mándame el link de otra tienda que conozcas y te digo si sirve.';
+let unicos=[...new Set(juegos)];
+out.innerText=unicos.slice(0,50).join('\n\n');
+if(unicos.length==0) out.innerText='SuperPSX bloqueó 1 min, espera y dale de nuevo. HTML: '+html.substring(0,500);
+}catch(e){out.innerText='Error: '+e}
 }
 </script></body></html>
