@@ -1,37 +1,40 @@
 <!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>ESPARTA V3</title>
-<style>body{background:#070f1e;color:white;font-family:Arial;padding:12px}input{width:100%;padding:12px;border-radius:10px;border:none}button{width:100%;background:#00a8ff;color:white;padding:14px;border:none;border-radius:10px;font-weight:bold;margin-top:10px;font-size:16px}#out{background:#12233f;padding:10px;margin-top:15px;border-radius:10px;word-break:break-all;white-space:pre-wrap}</style>
-</head>
-<body>
-<h2>ESPARTA V3 - PEGAR LINK</h2>
-<input id="url" placeholder="Pega el link, ej: https://dlpsgame.com/category/ps4/">
+<html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>ESPARTA V4 FINAL</title>
+<style>body{background:#070f1e;color:white;font-family:Arial;padding:12px}input{width:100%;padding:12px;border-radius:10px;border:none}button{width:100%;background:#00a8ff;color:white;padding:14px;border:none;border-radius:10px;font-weight:bold;margin-top:10px} #out{background:#12233f;padding:10px;margin-top:15px;border-radius:10px;white-space:pre-wrap;word-break:break-all}</style>
+</head><body>
+<h2>ESPARTA V4 - PRUEBA CON OTRA TIENDA</h2>
+<input id="url" value="https://ps4pkg.link/" placeholder="Pega link de otra tienda">
 <button onclick="buscar()">BUSCAR JUEGOS</button>
-<div id="out">Pega el link arriba y dale a BUSCAR...</div>
+<div id="out">Consejo: dlpsgame está bloqueada. Prueba con: ps4pkg.link / superps4.com / psgamer.fun</div>
 <script>
 async function buscar(){
 let url=document.getElementById('url').value.trim();
 let out=document.getElementById('out');
-if(!url){out.innerText='Pega un link';return;}
-out.innerText='Buscando... espera 10 seg...';
+out.innerText='Probando 3 formas de entrar... espera 15 seg...';
+let proxies=[
+'https://corsproxy.io/?'+encodeURIComponent(url),
+'https://api.allorigins.win/raw?url='+encodeURIComponent(url),
+'https://api.codetabs.com/v1/proxy?quest='+encodeURIComponent(url)
+];
+for(let p of proxies){
 try{
-let proxy='https://api.allorigins.win/raw?url='+encodeURIComponent(url);
-let res=await fetch(proxy);
-let html=await res.text();
+let r=await fetch(p);
+let html=await r.text();
+if(html.length>1000){
 let doc=new DOMParser().parseFromString(html,'text/html');
 let lista=[];
 doc.querySelectorAll('img').forEach(img=>{
-let src=img.src||img.getAttribute('data-src')||'';
-let title=(img.alt||'Juego PS4').replace(/"/g,'');
-if(src.includes('dlpsgame') && src.length>20){
-lista.push(`<div class="card">\n<img src="${src}">\n<h3>${title}</h3>\n<a class="btn" href="#">Descargar</a>\n</div>`);
+let src=img.src||img.dataset.src||'';
+if(src.length>20 && !src.includes('logo')){
+let title=(img.alt||'Juego PS4').substring(0,40);
+lista.push(`IMG: ${src}\nTITLE: ${title}\n---`);
 }
 });
-if(lista.length==0){out.innerText='No encontre, prueba con otra pagina. Codigo html: '+html.substring(0,500);return;}
-out.innerText=lista.slice(0,40).join('\n\n');
-}catch(e){out.innerText='Error: '+e+'\nPrueba con otra tienda que no sea dlpsgame, esa tiene bloqueo fuerte.'}
+if(lista.length>0){out.innerText='¡SI ENTRO! Copiado con: '+p+'\n\n'+lista.slice(0,20).join('\n'); return;}
 }
-</script>
-</body>
-</html>
+}catch(e){}
+}
+out.innerText='Esa tienda también bloquea. Mándame el link de otra tienda que conozcas y te digo si sirve.';
+}
+</script></body></html>
