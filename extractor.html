@@ -1,34 +1,30 @@
 <!DOCTYPE html>
 <html><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>ESPARTA SUPERPSX EXTRACTOR</title>
-<style>body{background:#070f1e;color:white;font-family:Arial;padding:12px}input{width:100%;padding:12px;border-radius:10px;border:none}button{width:100%;background:#ff0000;color:white;padding:14px;border:none;border-radius:10px;font-weight:bold;margin-top:10px;font-size:16px} #out{background:#12233f;padding:10px;margin-top:15px;border-radius:10px;white-space:pre-wrap;word-break:break-all;max-height:600px;overflow:auto}</style>
+<title>ESPARTA V5 SUPERPSX</title>
+<style>body{background:#070f1e;color:white;font-family:Arial;padding:12px}textarea{width:100%;height:150px;border-radius:10px;padding:10px}button{width:100%;background:#00ff88;color:black;padding:14px;border:none;border-radius:10px;font-weight:bold;margin-top:10px;font-size:16px} #out{background:#12233f;padding:10px;margin-top:15px;border-radius:10px;white-space:pre-wrap;word-break:break-all}</style>
 </head><body>
-<h2>ESPARTA - COPIADOR SUPERPSX</h2>
-<input id="url" value="https://superpsx.com/category/ps4" >
-<button onclick="copiar()">COPIAR JUEGOS DE ESTA PAGINA</button>
-<div id="out">Dale al botón rojo...</div>
+<h2>ESPARTA V5 - COPIA SUPERPSX SIN BLOQUEO</h2>
+<p>1. Abre superpsx.com/category/ps4 en otra pestaña<br>2. Mantén pulsado > Ver código fuente > Copiar todo<br>3. Pega abajo y dale a EXTRAER</p>
+<textarea id="html" placeholder="Pega aquí el código fuente de superpsx.com"></textarea>
+<button onclick="extraer()">EXTRAER JUEGOS</button>
+<div id="out">Esperando código...</div>
 <script>
-async function copiar(){
-let url=document.getElementById('url').value;
+function extraer(){
+let html=document.getElementById('html').value;
 let out=document.getElementById('out');
-out.innerText='Copiando Far Cry, Bravo Team, etc... espera 10 seg...';
-try{
-let proxy='https://corsproxy.io/?'+encodeURIComponent(url);
-let r=await fetch(proxy);
-let html=await r.text();
+if(html.length<100){out.innerText='Pega más texto, casi vacío';return;}
 let doc=new DOMParser().parseFromString(html,'text/html');
 let juegos=[];
-doc.querySelectorAll('a').forEach(a=>{
-let img=a.querySelector('img');
-if(img && img.src && a.textContent.trim().length>3 && a.textContent.trim().length<50){
-if(img.src.includes('superpsx') || img.src.includes('wp-content')){
-juegos.push(`<div class="card">\n  <img src="${img.src}">\n  <h3>${a.textContent.trim()}</h3>\n  <a class="btn" href="${a.href}">Descargar</a>\n</div>`);
-}
+doc.querySelectorAll('img').forEach(img=>{
+let src=img.src||img.getAttribute('data-src')||'';
+let alt=img.alt||'';
+let parent=img.closest('a');
+let link=parent?parent.href:'';
+if(src.includes('superpsx') && src.includes('uploads') && alt.length>2){
+juegos.push(`<div class="card">\n  <img src="${src}">\n  <h3>${alt}</h3>\n  <a href="${link}">Descargar</a>\n</div>`);
 }
 });
 let unicos=[...new Set(juegos)];
-out.innerText=unicos.slice(0,50).join('\n\n');
-if(unicos.length==0) out.innerText='SuperPSX bloqueó 1 min, espera y dale de nuevo. HTML: '+html.substring(0,500);
-}catch(e){out.innerText='Error: '+e}
+out.innerText=unicos.slice(0,60).join('\n\n') || 'No encontré juegos, ¿pegaste el código fuente completo? Asegúrate que copiaste TODO el código fuente.';
 }
 </script></body></html>
